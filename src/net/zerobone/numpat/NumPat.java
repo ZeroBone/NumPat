@@ -1,6 +1,8 @@
 package net.zerobone.numpat;
 
 import net.zerobone.numpat.dfa.DFA;
+import net.zerobone.numpat.math.Euklidian;
+import net.zerobone.numpat.unionfind.UnionFind;
 
 import java.util.List;
 
@@ -16,9 +18,34 @@ public class NumPat {
 
     }
 
-    public static void runOptimal(int base, int modulo) {
+    private static List<List<Integer>> computeEquivalenceClasses(int b, int m) {
 
+        if (m > b) {
+            System.err.println("[WARNING]: The correctness in case modulo > base is not proven jet.");
+        }
 
+        UnionFind equivalenceClasses = new UnionFind(m);
+
+        int modulo = m / Euklidian.gcd(b, m);
+
+        for (int n = 1; n < m; n++) {
+
+            int current = n;
+
+            for (;;) {
+                current = (current + modulo) % m;
+
+                if (current == 0 || current == n) {
+                    break;
+                }
+
+                equivalenceClasses.union(current, n);
+
+            }
+
+        }
+
+        return equivalenceClasses.getDisjointsSets();
 
     }
 
@@ -44,7 +71,8 @@ public class NumPat {
 
         // dfa.minimize();
 
-        List<List<Integer>> stateClasses = dfa.computeEquivalenceClasses();
+        // List<List<Integer>> stateClasses = dfa.computeEquivalenceClasses();
+        List<List<Integer>> stateClasses = computeEquivalenceClasses(base, modulo);
 
         System.out.printf("Modulo: %3d Equivalence classes: %3d -> %s\n", modulo, stateClasses.size(), stateClasses);
 
