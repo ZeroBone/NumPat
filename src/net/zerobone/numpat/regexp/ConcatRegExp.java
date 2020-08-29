@@ -46,14 +46,50 @@ public class ConcatRegExp extends RegExp {
         return operands.size() == 1 && operands.get(0).single();
     }
 
+    public IRegExp leftConcatWith(IRegExp leftSide) {
+
+        ArrayList<IRegExp> ops = new ArrayList<>();
+
+        ops.add(leftSide);
+
+        ops.addAll(operands);
+
+        return new ConcatRegExp(ops);
+
+    }
+
     @Override
     public IRegExp concatWith(IRegExp other) {
+
+        StructureType otherType = other.getType();
+
+        if (otherType == StructureType.TYPE_EMPTY) {
+            return OrRegExp.emptySet();
+        }
+
+        if (otherType == StructureType.TYPE_EPSILON) {
+            return this;
+        }
 
         if (isEpsilon()) {
             return other;
         }
 
-        return super.concatWith(other);
+        if (otherType == StructureType.TYPE_CONCAT) {
+
+            ArrayList<IRegExp> ops = new ArrayList<>(operands);
+
+            ops.addAll(((ConcatRegExp)other).operands);
+
+            return new ConcatRegExp(ops);
+
+        }
+
+        ArrayList<IRegExp> ops = new ArrayList<>(operands);
+
+        ops.add(other);
+
+        return new ConcatRegExp(ops);
 
     }
 

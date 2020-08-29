@@ -7,6 +7,14 @@ public abstract class RegExp implements IRegExp {
     @Override
     public IRegExp concatWith(IRegExp other) {
 
+        if (this.getType() == StructureType.TYPE_EPSILON) {
+            return other;
+        }
+
+        if (this.getType() == StructureType.TYPE_EMPTY) {
+            return OrRegExp.emptySet();
+        }
+
         if (other.getType() == StructureType.TYPE_EMPTY) {
             return OrRegExp.emptySet();
         }
@@ -15,8 +23,8 @@ public abstract class RegExp implements IRegExp {
             return this;
         }
 
-        if (getType() != StructureType.TYPE_CONCAT && other.getType() == StructureType.TYPE_CONCAT) {
-            return other.concatWith(this);
+        if (other.getType() == StructureType.TYPE_CONCAT) {
+            return ((ConcatRegExp)other).leftConcatWith(this);
         }
 
         return new ConcatRegExp(this, other);
@@ -30,7 +38,7 @@ public abstract class RegExp implements IRegExp {
             return this;
         }
 
-        if (getType() != StructureType.TYPE_OR && other.getType() == StructureType.TYPE_OR) {
+        if (/*getType() != StructureType.TYPE_OR && */other.getType() == StructureType.TYPE_OR) {
             return other.orWith(this);
         }
 

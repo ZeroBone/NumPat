@@ -66,11 +66,24 @@ public class OrRegExp extends RegExp {
     @Override
     public IRegExp orWith(IRegExp other) {
 
+        if (other.getType() == StructureType.TYPE_EMPTY) {
+            return this;
+        }
+
         if (isEmptySet()) {
             return other;
         }
 
-        return super.orWith(other);
+        ArrayList<IRegExp> ops = new ArrayList<>(operands);
+
+        if (other.getType() == StructureType.TYPE_OR) {
+            ops.addAll(((OrRegExp)other).operands);
+        }
+        else {
+            ops.add(other);
+        }
+
+        return new OrRegExp(ops);
 
     }
 
