@@ -44,7 +44,7 @@ public class OrRegExp extends RegExp {
 
     @Override
     public boolean single() {
-        return isEmptySet() || operands.size() == 1;
+        return isEmptySet() || operands.size() == 1 && operands.get(0).single();
     }
 
     @Override

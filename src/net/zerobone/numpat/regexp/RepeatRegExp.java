@@ -30,6 +30,7 @@ public class RepeatRegExp extends RegExp {
 
     @Override
     public void writeTo(StringBuilder sb) {
+
         if (repeating.single()) {
             repeating.writeTo(sb);
         }
@@ -38,7 +39,9 @@ public class RepeatRegExp extends RegExp {
             repeating.writeTo(sb);
             sb.append(')');
         }
+
         sb.append('*');
+
     }
 
 }

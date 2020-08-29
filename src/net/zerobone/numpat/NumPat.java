@@ -29,6 +29,10 @@ public class NumPat {
 
         UnionFind equivalenceClasses = new UnionFind(m);
 
+        /*if (Euklidian.gcd(b, m) == 1) {
+            return equivalenceClasses.getDisjointsSets();
+        }*/
+
         int modulo = m / Euklidian.gcd(b, m);
 
         for (int n = 0; n < m; n++) {
