@@ -1,66 +1,103 @@
 package net.zerobone.numpat.regexp;
 
+import java.util.ArrayList;
+
 public class ConcatRegExp extends RegExp {
 
-    private IRegExp left;
-    private IRegExp right;
+    private ArrayList<IRegExp> operands;
+
+    private ConcatRegExp() {
+        this.operands = new ArrayList<>(0);
+    }
+
+    public ConcatRegExp(ArrayList<IRegExp> operands) {
+        this.operands = operands;
+    }
 
     public ConcatRegExp(IRegExp left, IRegExp right) {
-        this.left = left;
-        this.right = right;
+
+        operands = new ArrayList<>(2);
+
+        operands.add(left);
+
+        operands.add(right);
+
     }
 
     @Override
     public boolean nullable() {
-        return left.nullable() && right.nullable();
+
+        for (IRegExp re : operands) {
+            if (!re.nullable()) {
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    private boolean isEpsilon() {
+        return operands.isEmpty();
     }
 
     @Override
     public boolean single() {
-        return false;
+        return operands.size() == 1 && operands.get(0).single();
+    }
+
+    @Override
+    public IRegExp concatWith(IRegExp other) {
+
+        if (isEpsilon()) {
+            return other;
+        }
+
+        return super.concatWith(other);
+
+    }
+
+    @Override
+    public IRegExp repeat() {
+
+        if (isEpsilon()) {
+            return this;
+        }
+
+        return super.repeat();
+
     }
 
     @Override
     public StructureType getType() {
-        return StructureType.TYPE_CONCAT;
-    }
-
-    @Override
-    public IRegExp derive(int terminal) {
-
-        IRegExp newLeft = left.derive(terminal).concatWith(right);
-
-        if (left.nullable()) {
-            // epsilon is then being concatenated on the right side
-
-            return newLeft.orWith(right.derive(terminal));
-
-        }
-
-        return newLeft;
-
+        return isEpsilon() ? StructureType.TYPE_EPSILON : StructureType.TYPE_CONCAT;
     }
 
     @Override
     public void writeTo(StringBuilder sb) {
 
-        if (left.getType() == StructureType.TYPE_OR) {
-            sb.append('(');
-            left.writeTo(sb);
-            sb.append(')');
-        }
-        else {
-            left.writeTo(sb);
+        if (isEpsilon()) {
+            sb.append('ε');
+            return;
         }
 
-        if (right.getType() == StructureType.TYPE_OR) {
-            sb.append('(');
-            right.writeTo(sb);
-            sb.append(')');
-        }
-        else {
-            right.writeTo(sb);
+        for (IRegExp re : operands) {
+
+            if (re.getType() == StructureType.TYPE_OR) {
+                sb.append('(');
+                re.writeTo(sb);
+                sb.append(')');
+            }
+            else {
+                re.writeTo(sb);
+            }
+
         }
 
     }
+
+    public static IRegExp epsilon() {
+        return new ConcatRegExp();
+    }
+
 }

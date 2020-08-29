@@ -24,11 +24,6 @@ public class TerminalRegExp extends RegExp {
     }
 
     @Override
-    public IRegExp derive(int terminal) {
-        return t == terminal ? RegExp.epsilon : RegExp.empty;
-    }
-
-    @Override
     public void writeTo(StringBuilder sb) {
         sb.append((char)t);
     }

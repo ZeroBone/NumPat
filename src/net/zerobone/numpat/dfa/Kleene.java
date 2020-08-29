@@ -1,8 +1,6 @@
 package net.zerobone.numpat.dfa;
 
-import net.zerobone.numpat.regexp.IRegExp;
-import net.zerobone.numpat.regexp.RegExp;
-import net.zerobone.numpat.regexp.TerminalRegExp;
+import net.zerobone.numpat.regexp.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,10 +19,10 @@ public class Kleene {
 
         if (k == -1) {
 
-            IRegExp r = RegExp.empty;
+            IRegExp r = OrRegExp.emptySet();
 
             if (i == j) {
-                r = r.orWith(RegExp.epsilon);
+                r = r.orWith(ConcatRegExp.epsilon());
             }
 
             for (int input = 0; input < dfa.alphabetSize; input++) {

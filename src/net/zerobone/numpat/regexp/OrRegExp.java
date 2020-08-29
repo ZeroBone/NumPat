@@ -1,55 +1,144 @@
 package net.zerobone.numpat.regexp;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class OrRegExp extends RegExp {
 
-    private IRegExp left;
-    private IRegExp right;
+    private ArrayList<IRegExp> operands;
+
+    private OrRegExp() {
+        this.operands = new ArrayList<>(0);
+    }
+
+    public OrRegExp(ArrayList<IRegExp> operands) {
+        this.operands = operands;
+    }
 
     public OrRegExp(IRegExp left, IRegExp right) {
-        this.left = left;
-        this.right = right;
+
+        operands = new ArrayList<>(2);
+
+        operands.add(left);
+
+        operands.add(right);
+
     }
 
     @Override
     public boolean nullable() {
-        return left.nullable() || right.nullable();
+
+        for (IRegExp re : operands) {
+            if (re.nullable()) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+    private boolean isEmptySet() {
+        return operands.isEmpty();
     }
 
     @Override
     public boolean single() {
-        return false;
+        return isEmptySet() || operands.size() == 1;
     }
 
     @Override
     public StructureType getType() {
-        return StructureType.TYPE_OR;
+        return isEmptySet() ? StructureType.TYPE_EMPTY : StructureType.TYPE_OR;
     }
 
     @Override
-    public IRegExp removeRedundantEpsilon() {
+    public IRegExp concatWith(IRegExp other) {
 
-        if (left == epsilon) {
-            return right;
+        if (isEmptySet()) {
+            return other;
         }
 
-        if (right == epsilon) {
-            return left;
-        }
-
-        return new OrRegExp(left.removeRedundantEpsilon(), right.removeRedundantEpsilon());
+        return super.concatWith(other);
 
     }
 
     @Override
-    public IRegExp derive(int terminal) {
-        return left.derive(terminal).orWith(right.derive(terminal));
+    public IRegExp orWith(IRegExp other) {
+
+        if (isEmptySet()) {
+            return other;
+        }
+
+        return super.orWith(other);
+
+    }
+
+    @Override
+    public IRegExp repeat() {
+
+        if (isEmptySet()) {
+            return ConcatRegExp.epsilon();
+        }
+
+        for (IRegExp re : operands) {
+            if (re.getType() == StructureType.TYPE_EPSILON) {
+                return new RepeatRegExp(removeRedundantEpsilon());
+            }
+        }
+
+        return super.repeat();
+
+    }
+
+    private IRegExp removeRedundantEpsilon() {
+
+        ArrayList<IRegExp> ops = new ArrayList<>();
+
+        for (IRegExp re : operands) {
+
+            if (re.getType() == StructureType.TYPE_EPSILON) {
+                continue;
+            }
+
+            ops.add(re);
+
+        }
+
+        return new OrRegExp(ops);
+
     }
 
     @Override
     public void writeTo(StringBuilder sb) {
-        left.writeTo(sb);
-        sb.append('|');
-        right.writeTo(sb);
+
+        if (isEmptySet()) {
+            sb.append('∅');
+            return;
+        }
+
+        Iterator<IRegExp> it = operands.iterator();
+
+        assert it.hasNext();
+
+        while (true) {
+
+            IRegExp re = it.next();
+
+            re.writeTo(sb);
+
+            if (!it.hasNext()) {
+                return;
+            }
+
+            sb.append('|');
+
+        }
+
+    }
+
+    public static IRegExp emptySet() {
+        return new OrRegExp();
     }
 
 }

@@ -5,15 +5,18 @@ public abstract class RegExp implements IRegExp {
     protected RegExp() {}
 
     @Override
-    public IRegExp removeRedundantEpsilon() {
-        return this;
-    }
-
-    @Override
     public IRegExp concatWith(IRegExp other) {
 
-        if (other == empty) {
-            return empty;
+        if (other.getType() == StructureType.TYPE_EMPTY) {
+            return OrRegExp.emptySet();
+        }
+
+        if (other.getType() == StructureType.TYPE_EPSILON) {
+            return this;
+        }
+
+        if (getType() != StructureType.TYPE_CONCAT && other.getType() == StructureType.TYPE_CONCAT) {
+            return other.concatWith(this);
         }
 
         return new ConcatRegExp(this, other);
@@ -23,8 +26,12 @@ public abstract class RegExp implements IRegExp {
     @Override
     public IRegExp orWith(IRegExp other) {
 
-        if (other == empty) {
+        if (other.getType() == StructureType.TYPE_EMPTY) {
             return this;
+        }
+
+        if (getType() != StructureType.TYPE_OR && other.getType() == StructureType.TYPE_OR) {
+            return other.orWith(this);
         }
 
         return new OrRegExp(this, other);
@@ -33,13 +40,7 @@ public abstract class RegExp implements IRegExp {
 
     @Override
     public IRegExp repeat() {
-
-        if (nullable()) {
-            return new RepeatRegExp(removeRedundantEpsilon());
-        }
-
         return new RepeatRegExp(this);
-
     }
 
     @Override
@@ -52,95 +53,5 @@ public abstract class RegExp implements IRegExp {
         return sb.toString();
 
     }
-
-    public static final IRegExp empty = new RegExp() {
-        @Override
-        public boolean nullable() {
-            return false;
-        }
-
-        @Override
-        public boolean single() {
-            return true;
-        }
-
-        @Override
-        public StructureType getType() {
-            return StructureType.TYPE_EMPTY;
-        }
-
-        @Override
-        public IRegExp derive(int terminal) {
-            return empty;
-        }
-
-        @Override
-        public IRegExp concatWith(IRegExp other) {
-            return empty;
-        }
-
-        @Override
-        public IRegExp orWith(IRegExp other) {
-            return other;
-        }
-
-        @Override
-        public IRegExp repeat() {
-            return epsilon;
-        }
-
-        @Override
-        public void writeTo(StringBuilder sb) {
-            sb.append('∅');
-        }
-    };
-
-    public static final IRegExp epsilon = new RegExp() {
-        @Override
-        public boolean nullable() {
-            return true;
-        }
-
-        @Override
-        public boolean single() {
-            return true;
-        }
-
-        @Override
-        public StructureType getType() {
-            return StructureType.TYPE_EPSILON;
-        }
-
-        @Override
-        public IRegExp derive(int terminal) {
-            return empty;
-        }
-
-        @Override
-        public IRegExp concatWith(IRegExp other) {
-            return other;
-        }
-
-        @Override
-        public IRegExp orWith(IRegExp other) {
-
-            if (other.nullable()) {
-                return other;
-            }
-
-            return super.orWith(other);
-
-        }
-
-        @Override
-        public IRegExp repeat() {
-            return epsilon;
-        }
-
-        @Override
-        public void writeTo(StringBuilder sb) {
-            sb.append('ε');
-        }
-    };
 
 }

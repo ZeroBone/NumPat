@@ -29,11 +29,6 @@ public class RepeatRegExp extends RegExp {
     }
 
     @Override
-    public IRegExp derive(int terminal) {
-        return repeating.derive(terminal).concatWith(new RepeatRegExp(repeating));
-    }
-
-    @Override
     public void writeTo(StringBuilder sb) {
         if (repeating.single()) {
             repeating.writeTo(sb);

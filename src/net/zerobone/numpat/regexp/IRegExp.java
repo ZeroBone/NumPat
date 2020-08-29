@@ -8,10 +8,6 @@ public interface IRegExp {
 
      StructureType getType();
 
-     IRegExp removeRedundantEpsilon();
-
-     IRegExp derive(int terminal);
-
      IRegExp concatWith(IRegExp other);
 
      IRegExp orWith(IRegExp other);
