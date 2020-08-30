@@ -201,8 +201,12 @@ public class DFA {
         return DfaMinimization.computeEquivalentStateClasses(this);
     }
 
+    public void minimize(List<List<Integer>> equivalenceClasses) {
+        combineStateClasses(equivalenceClasses);
+    }
+
     public void minimize() {
-        combineStateClasses(computeEquivalenceClasses());
+        minimize(computeEquivalenceClasses());
     }
 
     public IRegExp toRegexp() {
