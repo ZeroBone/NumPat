@@ -11,72 +11,27 @@ public class NumPat {
 
     public static void main(String[] args) {
 
-        for (int m = 1; m <= 10; m++) {
-            run(2, m);
+        if (args.length == 0) {
+            run(10, 6);
+            return;
         }
+
+        if (args.length == 1) {
+            run(10, Math.max(Integer.parseInt(args[0]), 1));
+            return;
+        }
+
+        int base = Math.max(Integer.parseInt(args[0]), 2);
+        int modulo = Math.max(Integer.parseInt(args[1]), 1);
+
+        run(base, modulo);
 
     }
-
-    /*private static List<List<Integer>> computeEquivalenceClassesNew(int b, int m) {
-
-        HashSet<Integer> finalStates = new HashSet<>();
-
-        finalStates.add(0);
-
-        UnionFind equivalenceClasses = new UnionFind(m);
-
-        int modulo;
-
-        if (m <= b) {
-            modulo = m / Euklidian.gcd(b, m);
-        }
-        else {
-
-            modulo = m;
-
-            for (int i = 1; i <= m; i++) {
-
-                int term = m / Euklidian.gcdPower(b, i, m);
-
-                modulo = Euklidian.lcm(modulo, term);
-
-            }
-
-            System.out.println("Equivalence classes modulo: " + modulo);
-
-        }
-
-        for (int n = 0; n < m; n++) {
-
-            int current = n;
-
-            boolean stateFinal = finalStates.contains(n);
-
-            for (;;) {
-                current = (current + modulo) % m;
-
-                if (finalStates.contains(current) != stateFinal) {
-                    continue;
-                }
-
-                if (current == n) {
-                    break;
-                }
-
-                equivalenceClasses.union(current, n);
-
-            }
-
-        }
-
-        return equivalenceClasses.getDisjointsSets();
-
-    }*/
 
     private static List<List<Integer>> computeEquivalenceClasses(int b, int m) {
 
         if (m > b) {
-            System.out.println("Possible wrong answer.");
+            return null;
         }
 
         HashSet<Integer> finalStates = new HashSet<>();
@@ -85,9 +40,9 @@ public class NumPat {
 
         UnionFind equivalenceClasses = new UnionFind(m);
 
-        /*if (Euklidian.gcd(b, m) == 1) {
+        if (Euklidian.gcd(b, m) == 1) {
             return equivalenceClasses.getDisjointsSets();
-        }*/
+        }
 
         int modulo = m / Euklidian.gcd(b, m);
 
@@ -120,6 +75,10 @@ public class NumPat {
 
     public static void run(int base, int modulo) {
 
+        System.out.printf("Base: %3d Modulo: %3d\n", base, modulo);
+
+        List<List<Integer>> equivalenceClasses = computeEquivalenceClasses(base, modulo);
+
         DFA dfa = new DFA(modulo, base, 0, 0);
 
         for (int state = 0; state < modulo; state++) {
@@ -136,43 +95,19 @@ public class NumPat {
 
         }
 
-        System.out.println("--------------------------");
-
-        // dfa.minimize();
-
-        List<List<Integer>> correctStateClasses = dfa.computeEquivalenceClasses();
-        List<List<Integer>> computedStateClasses = computeEquivalenceClasses(base, modulo);
-
-        {
-
-            HashSet<HashSet<Integer>> correctSetOfSets = new HashSet<>();
-            HashSet<HashSet<Integer>> computedSetOfSets = new HashSet<>();
-
-            for (List<Integer> correctClass : correctStateClasses) {
-                correctSetOfSets.add(new HashSet<>(correctClass));
-            }
-
-            for (List<Integer> computedClass : computedStateClasses) {
-                computedSetOfSets.add(new HashSet<>(computedClass));
-            }
-
-            if (!correctSetOfSets.equals(computedSetOfSets)) {
-                System.err.println("ERROR FOUND!");
-            }
-            else {
-                System.out.println("Everything correct.");
-            }
-
+        if (equivalenceClasses == null) {
+            System.out.println("Computing equivalence classes manually with an O(n^2) algorithm.");
+            equivalenceClasses = dfa.computeEquivalenceClasses();
         }
 
-        System.out.printf("Computed: Modulo: %3d Equivalence classes: %3d -> %s\n", modulo, computedStateClasses.size(), computedStateClasses);
-        System.out.printf("Correct:  Modulo: %3d Equivalence classes: %3d -> %s\n", modulo, correctStateClasses.size(), correctStateClasses);
+        dfa.minimize(equivalenceClasses);
 
-        dfa.minimize(correctStateClasses);
+        System.out.printf("Equivalence classes: %3d -> %s\n", equivalenceClasses.size(), equivalenceClasses);
 
         System.out.println(dfa.toRegexp());
 
-        // System.out.println(dfa.toString());
+        System.out.println("DFA:");
+        System.out.println(dfa.toString());
 
     }
 
