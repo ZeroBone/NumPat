@@ -4,6 +4,9 @@ import net.zerobone.numpat.dfa.DFA;
 import net.zerobone.numpat.math.Euklidian;
 import net.zerobone.numpat.unionfind.UnionFind;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -77,8 +80,6 @@ public class NumPat {
 
         System.out.printf("Base: %3d Modulo: %3d\n", base, modulo);
 
-        List<List<Integer>> equivalenceClasses = computeEquivalenceClasses(base, modulo);
-
         DFA dfa = new DFA(modulo, base, 0, 0);
 
         for (int state = 0; state < modulo; state++) {
@@ -95,6 +96,8 @@ public class NumPat {
 
         }
 
+        List<List<Integer>> equivalenceClasses = computeEquivalenceClasses(base, modulo);
+
         if (equivalenceClasses == null) {
             System.out.println("Computing equivalence classes manually with an O(n^2) algorithm.");
             equivalenceClasses = dfa.computeEquivalenceClasses();
@@ -104,7 +107,14 @@ public class NumPat {
 
         System.out.printf("Equivalence classes: %3d -> %s\n", equivalenceClasses.size(), equivalenceClasses);
 
-        System.out.println(dfa.toRegexp());
+        String regexp = dfa.toRegexp().toString();
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("regexp.txt"));
+            writer.write(regexp);
+            writer.close();
+        }
+        catch (IOException ignored) {}
 
         System.out.println("DFA:");
         System.out.println(dfa.toString());

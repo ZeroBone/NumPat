@@ -52,11 +52,6 @@ public abstract class RegExp implements IRegExp {
     }
 
     @Override
-    public IRegExp optimize() {
-        return this;
-    }
-
-    @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();

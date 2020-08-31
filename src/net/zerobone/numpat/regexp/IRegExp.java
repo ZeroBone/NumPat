@@ -14,8 +14,6 @@ public interface IRegExp {
 
      IRegExp repeat();
 
-     IRegExp optimize();
-
      void writeTo(StringBuilder sb);
 
      String toString();

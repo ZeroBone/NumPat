@@ -105,35 +105,6 @@ public class ConcatRegExp extends RegExp {
     }
 
     @Override
-    public IRegExp optimize() {
-
-        ArrayList<IRegExp> ops = new ArrayList<>();
-
-        for (IRegExp re : operands) {
-
-            IRegExp optimized = re.optimize();
-
-            StructureType optimizedType = optimized.getType();
-
-            if (optimizedType == StructureType.TYPE_EPSILON) {
-                continue;
-            }
-
-            if (optimizedType == StructureType.TYPE_EMPTY) {
-                return OrRegExp.emptySet();
-            }
-
-            ops.add(optimized);
-
-        }
-
-        operands = ops;
-
-        return this;
-
-    }
-
-    @Override
     public StructureType getType() {
         return isEpsilon() ? StructureType.TYPE_EPSILON : StructureType.TYPE_CONCAT;
     }
@@ -142,7 +113,7 @@ public class ConcatRegExp extends RegExp {
     public void writeTo(StringBuilder sb) {
 
         if (isEpsilon()) {
-            sb.append('ε');
+            sb.append('$');
             return;
         }
 
@@ -158,21 +129,6 @@ public class ConcatRegExp extends RegExp {
             }
 
         }
-
-    }
-
-    private static IRegExp optimizeConcatenation(IRegExp l, IRegExp r) {
-
-        StructureType leftType = l.getType();
-        StructureType rightType = r.getType();
-
-        if (leftType == StructureType.TYPE_REPEAT) {
-
-            // TODO
-
-        }
-
-        return null;
 
     }
 

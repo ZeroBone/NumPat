@@ -2,7 +2,6 @@ package net.zerobone.numpat.dfa;
 
 import net.zerobone.numpat.regexp.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Kleene {
@@ -58,8 +57,6 @@ public class Kleene {
         }
 
         IRegExp s = computeR(i, j, k);
-
-        s = s.optimize();
 
         cache.put(new Triple(i, j, k), s);
 
