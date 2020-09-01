@@ -31,48 +31,69 @@ public class NumPat {
 
     }
 
-    private static List<List<Integer>> computeEquivalenceClasses(int b, int m) {
+    private static List<List<Integer>> computeEquivalenceClasses(int b, int m, HashSet<Integer> finalStates) {
 
         if (m > b) {
             return null;
         }
 
-        HashSet<Integer> finalStates = new HashSet<>();
-
-        finalStates.add(0);
-
         UnionFind equivalenceClasses = new UnionFind(m);
 
-        if (Euklidian.gcd(b, m) == 1) {
+        int bmgcd = Euklidian.gcd(b, m);
+
+        if (bmgcd == 1) {
             return equivalenceClasses.getDisjointsSets();
         }
 
-        int modulo = m / Euklidian.gcd(b, m);
+        int optimizedM = m / bmgcd;
 
-        for (int n = 0; n < m; n++) {
+        // loop through every set in the new set of equivalence classes
+        for (int anchor = 0; anchor < optimizedM; anchor++) {
 
-            int current = n;
+            int current = anchor;
+            // oppositeAnchor is the element that is final if anchor is intermediate
+            // and intermediate if anchor is final
+            // if oppositeAnchor == anchor, then it is considered as not yet found
+            int oppositeAnchor = anchor;
 
-            boolean stateFinal = finalStates.contains(n);
+            boolean anchorFinal = finalStates.contains(anchor);
 
             for (;;) {
-                current = (current + modulo) % m;
 
-                if (finalStates.contains(current) != stateFinal) {
-                    continue;
-                }
+                current = (current + optimizedM) % m;
 
-                if (current == n) {
+                if (current == anchor) {
                     break;
                 }
 
-                equivalenceClasses.union(current, n);
+                boolean currentFinal = finalStates.contains(current);
+
+                if (currentFinal == anchorFinal) {
+                    equivalenceClasses.union(current, anchor);
+                }
+                else if (oppositeAnchor == anchor) {
+                    // "initialize" oppositeAnchor
+                    oppositeAnchor = current;
+                }
+                else {
+                    equivalenceClasses.union(current, oppositeAnchor);
+                }
 
             }
 
         }
 
         return equivalenceClasses.getDisjointsSets();
+
+    }
+
+    private static List<List<Integer>> computeEquivalenceClasses(int b, int m) {
+
+        HashSet<Integer> finalStates = new HashSet<>();
+
+        finalStates.add(0);
+
+        return computeEquivalenceClasses(b, m, finalStates);
 
     }
 
