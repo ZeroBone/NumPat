@@ -111,7 +111,10 @@ public class DFA {
 
         }
 
-        // System.out.println("To eliminate: " + statesToBeEliminated);
+        /*System.out.println("DFA before second phase:");
+        System.out.println(toString());
+        System.out.println("Second phase.");
+        System.out.println("To eliminate: " + statesToBeEliminated);*/
 
         if (statesToBeEliminated.isEmpty()) {
             // nothing to do
@@ -156,7 +159,7 @@ public class DFA {
 
         assert to >= from;
 
-        // System.out.println("Eliminating states between " + from + " and " + to + "...");
+        System.out.println("Eliminating states between " + from + " and " + to + "...");
 
         int delta = to - from + 1;
 
@@ -181,19 +184,23 @@ public class DFA {
 
         }
 
-        int maxEntry = (to + 1) * alphabetSize;
-
-        assert maxEntry <= transitions.length;
-
-        for (int i = 0; i < maxEntry; i++) {
+        for (int i = 0; i < transitions.length; i++) {
 
             assert transitions[i] < from || transitions[i] > to;
 
             if (transitions[i] > to) {
+                // System.out.println(transitions[i] + " -> " + (from - 1));
+                // System.out.println(transitions[i] + " -> " + (transitions[i] - delta));
                 transitions[i] -= delta;
+                // transitions[i] = from - 1;
             }
 
+            // assert transitions[i] < maxEntry;
+
         }
+
+        // System.out.println(toString());
+        // System.out.println();
 
     }
 
@@ -219,6 +226,10 @@ public class DFA {
 
     public int getStateCount() {
         return transitions.length / alphabetSize;
+    }
+
+    public Iterator<Integer> finalStatesIterator() {
+        return finalStates.iterator();
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class NumPat {
@@ -42,7 +43,7 @@ public class NumPat {
         int bmgcd = Euklidian.gcd(b, m);
 
         if (bmgcd == 1) {
-            return equivalenceClasses.getDisjointsSets();
+            return equivalenceClasses.getDisjointSets();
         }
 
         int optimizedM = m / bmgcd;
@@ -83,7 +84,7 @@ public class NumPat {
 
         }
 
-        return equivalenceClasses.getDisjointsSets();
+        return equivalenceClasses.getDisjointSets();
 
     }
 
@@ -124,21 +125,160 @@ public class NumPat {
             equivalenceClasses = dfa.computeEquivalenceClasses();
         }
 
+        System.out.printf("Equivalence classes: %3d -> %s\n", equivalenceClasses.size(), equivalenceClasses);
+        System.out.println("Before minimization:");
+        System.out.println(dfa.toString());
+
         dfa.minimize(equivalenceClasses);
 
-        System.out.printf("Equivalence classes: %3d -> %s\n", equivalenceClasses.size(), equivalenceClasses);
-
-        String regexp = dfa.toRegexp().toString();
+        /*String regexp = dfa.toRegexp().toString();
 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("regexp.txt"));
             writer.write(regexp);
             writer.close();
         }
-        catch (IOException ignored) {}
+        catch (IOException e) {
+            e.printStackTrace();
+        }*/
 
         System.out.println("DFA:");
         System.out.println(dfa.toString());
+
+        try {
+            exportDfaToFile(dfa, "dfa.txt");
+            exportDfaToTTFile(dfa, "dfa-tt.txt");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void exportDfaToFile(DFA dfa, final String fileName) throws IOException {
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+
+        writer.write("#states");
+
+        for (int i = 0; i < dfa.getStateCount(); i++) {
+            writer.newLine();
+            writer.write("s" + i);
+        }
+
+        writer.newLine();
+        writer.write("#initial");
+        writer.newLine();
+
+        writer.write("s" + dfa.getInitialState());
+        writer.newLine();
+
+        writer.write("#accepting");
+
+        for (Iterator<Integer> it = dfa.finalStatesIterator(); it.hasNext();) {
+            int finalState = it.next();
+
+            writer.newLine();
+            writer.write("s" + finalState);
+
+        }
+
+        writer.newLine();
+
+        writer.write("#alphabet");
+
+        for (int i = 0; i < dfa.alphabetSize; i++) {
+            writer.newLine();
+            writer.write(Integer.toString(i, 16));
+        }
+
+        writer.newLine();
+
+        writer.write("#transitions");
+
+        for (int state = 0; state < dfa.getStateCount(); state++) {
+
+            for (int input = 0; input < dfa.alphabetSize; input++) {
+
+                int targetState = dfa.getTransition(state, input);
+
+                writer.newLine();
+                writer.write("s" + state + ":" + Integer.toString(input, 16) + ">s" + targetState);
+
+            }
+
+        }
+
+        writer.close();
+
+    }
+
+    private static void exportDfaToTTFile(DFA dfa, final String fileName) throws IOException {
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+
+        writer.write("inputs ");
+
+        {
+            int i = 0;
+            while (true) {
+                writer.write("i" + Integer.toString(i, 16));
+
+                i++;
+
+                if (i >= dfa.alphabetSize) {
+                    break;
+                }
+
+                writer.write(",");
+
+            }
+        }
+
+        writer.write(";");
+        writer.newLine();
+
+        writer.write("outputs ;");
+        writer.newLine();
+
+        writer.write("init " + dfa.getInitialState() + ";");
+        writer.newLine();
+
+        writer.write("transitions");
+
+        for (int state = 0; state < dfa.getStateCount(); state++) {
+
+            for (int input = 0; input < dfa.alphabetSize; input++) {
+
+                int targetState = dfa.getTransition(state, input);
+
+                writer.newLine();
+                writer.write("    ");
+                writer.write("(" + state + ",i" + Integer.toString(input, 16) + "," + targetState + ");");
+
+            }
+
+        }
+
+        writer.newLine();
+        writer.write("accept ");
+
+        for (Iterator<Integer> it = dfa.finalStatesIterator();;) {
+            int finalState = it.next();
+
+            writer.write(String.valueOf(finalState));
+
+            if (!it.hasNext()) {
+                break;
+            }
+
+            writer.write(",");
+
+        }
+
+        writer.write(";");
+
+        writer.close();
 
     }
 

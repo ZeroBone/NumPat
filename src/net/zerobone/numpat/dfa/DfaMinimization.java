@@ -140,7 +140,7 @@ public class DfaMinimization {
 
         }
 
-        return orbits.getDisjointsSets();
+        return orbits.getDisjointSets();
 
     }
 

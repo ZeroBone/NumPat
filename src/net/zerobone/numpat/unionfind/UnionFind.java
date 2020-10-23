@@ -40,7 +40,7 @@ public class UnionFind {
 
     }
 
-    public List<List<Integer>> getDisjointsSets() {
+    public List<List<Integer>> getDisjointSets() {
 
         ArrayList<List<Integer>> disjontsSets = new ArrayList<>();
 
